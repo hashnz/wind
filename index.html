@@ -39,10 +39,11 @@
 	<script src="https://widget.windguru.cz/js/wg_widget.php" type="text/javascript"></script>
 	<script language="JavaScript" type="text/javascript">
 	function wind(spot, waves) {
-		var params = ['WINDSPD','GUST','SMER','APCPs'];
+		var params = ['WINDSPD','GUST','SMER'];
 		if (waves) {
 			params = params.concat(['HTSGW','PERPW','WAVESMER']);
 		}
+		params.push('APCPs');
 		return {
 			s: spot, 
 			odh:7, doh:19, wj:'knots', tj:'c', waj:'m', fhours:72, lng:'en',
