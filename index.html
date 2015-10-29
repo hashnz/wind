@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Wind</title>
+
+	<style type="text/css">
+    .col { width: 50%; margin: auto; }
+	.west { float: left; }
+	.east { float: right; }
+	.col div { padding: 5px !important;}
+	</style>
+</head>
+<body>
+
+	<ul>
+		<li><a href="http://www.windsurf.co.nz/windsurf_weather_alk.asp">Wind</a></li>
+		<li><a href="https://www.google.com/maps/d/u/0/viewer?mid=zPnMlT0cW4Ro.k8x0IwPcjLUM&hl=en_US">RIPD</a></li>
+	</ul>
+
+	<div class="col west">
+		<div id="pt-chev"></div>
+		<div id="murawai"></div>
+		<div id="south-head"></div>
+		<div id="port-waikato"></div>
+		<div id="raglan"></div>
+		<!-- <div id="whangarei"></div> -->
+	</div>
+
+	<div class="col east">
+		<div id="te-atatu"></div>
+		<div id="orewa"></div>
+		<div id="mangawhai"></div>
+		<div id="omaha"></div>
+		<div id="ruakaka"></div>
+	</div>
+
+	<script src="http://widget.windguru.cz/js/wg_widget.php" type="text/javascript"></script>
+	<script language="JavaScript" type="text/javascript">
+	function wind(spot, waves) {
+		var params = ['WINDSPD','GUST','SMER','APCPs'];
+		if (waves) {
+			params = params.concat(['HTSGW','PERPW','WAVESMER']);
+		}
+		return {
+			s: spot, 
+			odh:7, doh:19, wj:'knots', tj:'c', waj:'m', fhours:72, lng:'en',
+			params: params,
+			first_row:true,
+			spotname:true,
+			first_row_minfo:false,
+			last_row:false,
+			lat_lon:true,
+			tz:true,
+			sun:true,
+			link_archive:false,
+			link_new_window:false
+		}
+	}
+
+	WgWidget(new wind(183129, false), 'pt-chev');
+	WgWidget(new wind(25739, true), 'murawai');
+	WgWidget(new wind(359364, false), 'te-atatu');
+	WgWidget(new wind(25730, true), 'orewa');
+	WgWidget(new wind(287802, false), 'mangawhai');
+	WgWidget(new wind(212754, false), 'omaha');
+	WgWidget(new wind(174953, false), 'ruakaka');
+	WgWidget(new wind(25736, true), 'raglan');
+	WgWidget(new wind(94563, true), 'port-waikato');
+	WgWidget(new wind(269929, false), 'south-head');
+	// WgWidget(new wind(66658, false), 'whangarei');
+	</script>
+
+</body>
+</html>
