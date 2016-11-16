@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Wind</title>
 
 	<style type="text/css">
@@ -37,7 +38,7 @@
 		.row {
 			display: flex;
 		}
-		.row a {
+		.row a, .row .info {
 			flex-grow: 1;
 		}
 		.row .col a {
@@ -47,33 +48,59 @@
 			display: flex;
 			flex-direction: column;
 		}
+		.ew-switch {
+			display: none;
+		}
 
-		/*@media (max-width: 1200px) {*/
-			/*.east {*/
-				/*display: none;*/
-			/*}*/
+		@media (max-width: 768px) {
+			.container {
+				width: 100%;
+			}
+			.hide-col {
+				display: none;
+			}
+			.ew-switch {
+				display: block;
+			}
 			/*.container {*/
 				/*display: block;*/
 			/*}*/
 			/*.col, .forecast {*/
 				/*flex-grow: 1;*/
 			/*}*/
-		/*}*/
+		}
+
+		.info {
+			color: #fff;
+		}
+
+		.low-tide:before {
+			content: "⇃"
+		}
+		.high-tide:before {
+			content: "↿"
+		}
+
 
 	</style>
 </head>
 <body>
 	<div class="container">
+
 		<div class="row">
-			<a class="btn">E</a>
-			<a class="btn">W</a>
+			<div id="sunrise" class="info">&#x2600; <span class="number"></span></div>
+			<div id="sunset" class="info">&#x2600; <span class="number"></span></div>
 		</div>
+		<div class="row" id="tide"></div>
 		<div class="row">
 			<a class="btn" href="http://www.windsurf.co.nz/windsurf_weather_alk.asp">WIND</a>
 		</div>
 		<div class="row">
-			<div class="col west">
-				<a class="btn" href="http://www.metservice.com/marine-surf/tides/auckland">WESTHAVEN</a></li>
+			<a class="btn ew-switch">E ⇋ W</a>
+		</div>
+		<div class="row">
+			<div class="col west guru">
+				<!--<a class="btn" href="http://www.metservice.com/marine-surf/tides/auckland">WESTHAVEN</a></li>-->
 				<div class="forecast" id="pt-chev"></div>
 				<div class="forecast" id="murawai"></div>
 				<!--<div class="forecast" id="south-head"></div>-->
@@ -81,8 +108,8 @@
 				<!--<div class="forecast" id="raglan"></div>-->
 				<!-- <div id="whangarei"></div> -->
 			</div>
-			<div class="col east">
-				<a class="btn" href="http://metservice.com/marine/tides/muriwai-beach">MURIWAI</a>
+			<div class="col east guru hide-col">
+				<!--<a class="btn" href="http://metservice.com/marine/tides/muriwai-beach">MURIWAI</a>-->
 				<div class="forecast" id="te-atatu"></div>
 				<div class="forecast" id="orewa"></div>
 				<!--<div class="forecast" id="mangawhai"></div>-->
@@ -99,6 +126,93 @@
 		</div>
 	</div>
 
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.16.0/moment.min.js"></script>
+	<script>
+		$(document).ready(function() {
+
+			var tides = {
+				Nov_2016_16:[{type:'low-tide', time:'02:53'},{type:'high-tide', time:'09:20'},{type:'low-tide', time:'15:19'},{type:'high-tide', time:'21:45'}],
+				Nov_2016_17:[{type:'low-tide', time:'03:45'},{type:'high-tide', time:'10:12'},{type:'low-tide', time:'16:12'},{type:'high-tide', time:'22:38'}],
+				Nov_2016_18:[{type:'low-tide', time:'04:35'},{type:'high-tide', time:'11:03'},{type:'low-tide', time:'17:05'},{type:'high-tide', time:'23:31'}],
+				Nov_2016_19:[{type:'low-tide', time:'05:26'},{type:'high-tide', time:'11:56'},{type:'low-tide', time:'18:00'}],
+				Nov_2016_20:[{type:'high-tide', time:'00:24'},{type:'low-tide', time:'06:18'},{type:'high-tide', time:'12:49'},{type:'low-tide', time:'18:56'}],
+				Nov_2016_21:[{type:'high-tide', time:'01:18'},{type:'low-tide', time:'07:12'},{type:'high-tide', time:'13:44'},{type:'low-tide', time:'19:53'}],
+				Nov_2016_22:[{type:'high-tide', time:'02:13'},{type:'low-tide', time:'08:10'},{type:'high-tide', time:'14:40'},{type:'low-tide', time:'20:52'}],
+				Nov_2016_23:[{type:'high-tide', time:'03:10'},{type:'low-tide', time:'09:10'},{type:'high-tide', time:'15:37'},{type:'low-tide', time:'21:50'}],
+				Nov_2016_24:[{type:'high-tide', time:'04:09'},{type:'low-tide', time:'10:11'},{type:'high-tide', time:'16:33'},{type:'low-tide', time:'22:45'}],
+				Nov_2016_25:[{type:'high-tide', time:'05:07'},{type:'low-tide', time:'11:09'},{type:'high-tide', time:'17:26'},{type:'low-tide', time:'23:38'}],
+				Nov_2016_26:[{type:'high-tide', time:'06:02'},{type:'low-tide', time:'12:01'},{type:'high-tide', time:'18:16'},{type:'low-tide', time:''}],
+				Nov_2016_27:[{type:'low-tide', time:'00:27'},{type:'high-tide', time:'06:53'},{type:'low-tide', time:'12:48'},{type:'high-tide', time:'19:03'}],
+				Nov_2016_28:[{type:'low-tide', time:'01:12'},{type:'high-tide', time:'07:39'},{type:'low-tide', time:'13:31'},{type:'high-tide', time:'19:47'}],
+				Nov_2016_29:[{type:'low-tide', time:'01:53'},{type:'high-tide', time:'08:21'},{type:'low-tide', time:'14:11'},{type:'high-tide', time:'20:29'}],
+				Nov_2016_30:[{type:'low-tide', time:'02:32'},{type:'high-tide', time:'09:01'},{type:'low-tide', time:'14:51'},{type:'high-tide', time:'21:10'}],
+				Dec_2016_1:[{type:'low-tide', time:'03:10'},{type:'high-tide', time:'09:39'},{type:'low-tide', time:'15:30'},{type:'high-tide', time:'21:49'}],
+				Dec_2016_2:[{type:'low-tide', time:'03:47'},{type:'high-tide', time:'10:16'},{type:'low-tide', time:'16:09'},{type:'high-tide', time:'22:28'}],
+				Dec_2016_3:[{type:'low-tide', time:'04:25'},{type:'high-tide', time:'10:54'},{type:'low-tide', time:'16:50'},{type:'high-tide', time:'23:08'}],
+				Dec_2016_4:[{type:'low-tide', time:'05:03'},{type:'high-tide', time:'11:34'},{type:'low-tide', time:'17:32'},{type:'high-tide', time:'23:48'}],
+				Dec_2016_5:[{type:'low-tide', time:'05:44'},{type:'high-tide', time:'12:16'},{type:'low-tide', time:'18:16'}],
+				Dec_2016_6:[{type:'high-tide', time:'00:31'},{type:'low-tide', time:'06:27'},{type:'high-tide', time:'13:01'},{type:'low-tide', time:'19:03'}],
+				Dec_2016_7:[{type:'high-tide', time:'01:17'},{type:'low-tide', time:'07:15'},{type:'high-tide', time:'13:49'},{type:'low-tide', time:'19:54'}],
+				Dec_2016_8:[{type:'high-tide', time:'02:08'},{type:'low-tide', time:'08:09'},{type:'high-tide', time:'14:42'},{type:'low-tide', time:'20:49'}],
+				Dec_2016_9:[{type:'high-tide', time:'03:05'},{type:'low-tide', time:'09:10'},{type:'high-tide', time:'15:39'},{type:'low-tide', time:'21:47'}],
+				Dec_2016_10:[{type:'high-tide', time:'04:07'},{type:'low-tide', time:'10:14'},{type:'high-tide', time:'16:38'},{type:'low-tide', time:'22:47'}],
+				Dec_2016_11:[{type:'high-tide', time:'05:12'},{type:'low-tide', time:'11:17'},{type:'high-tide', time:'17:38'},{type:'low-tide', time:'23:46'}],
+				Dec_2016_12:[{type:'high-tide', time:'06:14'},{type:'low-tide', time:'12:17'},{type:'high-tide', time:'18:38'},{type:'low-tide', time:''}],
+				Dec_2016_13:[{type:'low-tide', time:'00:44'},{type:'high-tide', time:'07:13'},{type:'low-tide', time:'13:14'},{type:'high-tide', time:'19:36'}],
+				Dec_2016_14:[{type:'low-tide', time:'01:40'},{type:'high-tide', time:'08:09'},{type:'low-tide', time:'14:09'},{type:'high-tide', time:'20:32'}],
+				Dec_2016_15:[{type:'low-tide', time:'02:34'},{type:'high-tide', time:'09:03'},{type:'low-tide', time:'15:02'},{type:'high-tide', time:'21:27'}],
+				Dec_2016_16:[{type:'low-tide', time:'03:26'},{type:'high-tide', time:'09:54'},{type:'low-tide', time:'15:56'},{type:'high-tide', time:'22:21'}],
+				Dec_2016_17:[{type:'low-tide', time:'04:16'},{type:'high-tide', time:'10:45'},{type:'low-tide', time:'16:48'},{type:'high-tide', time:'23:12'}],
+				Dec_2016_18:[{type:'low-tide', time:'05:06'},{type:'high-tide', time:'11:36'},{type:'low-tide', time:'17:41'}],
+				Dec_2016_19:[{type:'high-tide', time:'00:03'},{type:'low-tide', time:'05:56'},{type:'high-tide', time:'12:26'},{type:'low-tide', time:'18:33'}],
+				Dec_2016_20:[{type:'high-tide', time:'00:54'},{type:'low-tide', time:'06:46'},{type:'high-tide', time:'13:17'},{type:'low-tide', time:'19:25'}],
+				Dec_2016_21:[{type:'high-tide', time:'01:45'},{type:'low-tide', time:'07:39'},{type:'high-tide', time:'14:08'},{type:'low-tide', time:'20:17'}],
+				Dec_2016_22:[{type:'high-tide', time:'02:37'},{type:'low-tide', time:'08:34'},{type:'high-tide', time:'15:00'},{type:'low-tide', time:'21:10'}],
+				Dec_2016_23:[{type:'high-tide', time:'03:32'},{type:'low-tide', time:'09:32'},{type:'high-tide', time:'15:52'},{type:'low-tide', time:'22:04'}],
+				Dec_2016_24:[{type:'high-tide', time:'04:29'},{type:'low-tide', time:'10:29'},{type:'high-tide', time:'16:44'},{type:'low-tide', time:'22:57'}],
+				Dec_2016_25:[{type:'high-tide', time:'05:25'},{type:'low-tide', time:'11:23'},{type:'high-tide', time:'17:36'},{type:'low-tide', time:'23:49'}],
+				Dec_2016_26:[{type:'high-tide', time:'06:18'},{type:'low-tide', time:'12:12'},{type:'high-tide', time:'18:26'},{type:'low-tide', time:''}],
+				Dec_2016_27:[{type:'low-tide', time:'00:37'},{type:'high-tide', time:'07:06'},{type:'low-tide', time:'12:59'},{type:'high-tide', time:'19:14'}],
+				Dec_2016_28:[{type:'low-tide', time:'01:22'},{type:'high-tide', time:'07:51'},{type:'low-tide', time:'13:42'},{type:'high-tide', time:'19:59'}],
+				Dec_2016_29:[{type:'low-tide', time:'02:04'},{type:'high-tide', time:'08:33'},{type:'low-tide', time:'14:24'},{type:'high-tide', time:'20:42'}],
+				Dec_2016_30:[{type:'low-tide', time:'02:44'},{type:'high-tide', time:'09:13'},{type:'low-tide', time:'15:05'},{type:'high-tide', time:'21:24'}],
+				Dec_2016_31:[{type:'low-tide', time:'03:23'},{type:'high-tide', time:'09:52'},{type:'low-tide', time:'15:46'},{type:'high-tide', time:'22:05'}],
+			};
+
+			var suns = {
+				Nov_2016_15:{sunrise:'06:04', sunset: '20:07'},
+				Nov_2016_16:{sunrise:'06:03', sunset: '20:08'},
+				Nov_2016_17:{sunrise:'06:02', sunset: '20:09'},
+				Nov_2016_18:{sunrise:'06:02', sunset: '20:10'},
+				Nov_2016_19:{sunrise:'06:01', sunset: '20:11'},
+				Nov_2016_20:{sunrise:'06:00', sunset: '20:12'},
+				Nov_2016_21:{sunrise:'06:00', sunset: '20:13'},
+				Nov_2016_22:{sunrise:'05:59', sunset: '20:14'},
+				Nov_2016_23:{sunrise:'05:59', sunset: '20:15'},
+				Nov_2016_24:{sunrise:'05:58', sunset: '20:16'},
+				Nov_2016_25:{sunrise:'05:58', sunset: '20:17'},
+				Nov_2016_26:{sunrise:'05:57', sunset: '20:18'},
+				Nov_2016_27:{sunrise:'05:57', sunset: '20:19'},
+				Nov_2016_28:{sunrise:'05:57', sunset: '20:20'},
+				Nov_2016_29:{sunrise:'05:57', sunset: '20:21'},
+				Nov_2016_30:{sunrise:'05:56', sunset: '20:22'}
+			};
+
+			var today = moment().format('MMM_YYYY_DD');
+			var sun = suns[today];
+			var tide = tides[today];
+
+			$('#sunrise .number').html(sun.sunrise);
+			$('#sunset .number').html(sun.sunset);
+			for (var i = 0; i < tide.length; i++)
+				$('#tide').append($('<div>'+tide[i].time+'</div>').addClass("info "+tide[i].type));
+
+			$('.ew-switch').click(function() {
+				$('.guru').toggleClass('hide-col');
+			});
+		});
+	</script>
 	<script src="https://widget.windguru.cz/js/wg_widget.php" type="text/javascript"></script>
 	<script language="JavaScript" type="text/javascript">
 	function wind(spot, waves) {
